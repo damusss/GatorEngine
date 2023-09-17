@@ -1,11 +1,11 @@
 import os
 os.add_dll_directory(os.getcwd()+"/libs/GLFW")
-from common.settings import AppSettings
+from gator.common.settings import AppSettings
 from geditor.editor import GatorEditor
 
 def main():
     settings = AppSettings(
-        "auto", "auto", "Gator Engine Editor [Test]", "main", "test")
+        "auto", "auto", True, "Gator Engine Editor [Test]", "main", "test", "projects.", None, None)
     editor = GatorEditor(settings)
     editor.run()
 
