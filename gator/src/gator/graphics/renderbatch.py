@@ -13,7 +13,7 @@ from gator.components.spriterenderer import SpriteRenderer
 
 
 class RenderBatch:
-    VERTEX_SIZE: int = 10
+    VERTEX_SIZE: int = 11
 
     def __init__(self, maxSprites: int, maxTexures: int, meshConfig: list[int, str, list[int], bool, list[float] | None, str, list[int]]):
         self.maxSprites: int = maxSprites
@@ -27,6 +27,11 @@ class RenderBatch:
         self.textures: list[Texture] = []
         self.mesh: IndexedVertexMesh = IndexedVertexMesh(*self.meshConfig)
         self.rebufferData: bool = False
+
+    def reset(self):
+        self.vertices: list[float] = [0 for i in range(self.maxSprites*4*self.VERTEX_SIZE)]
+        self.sprites = []
+        self.textures = []
 
     def render(self, shader: Shader):
         shader.uniformMat4F("uProj", self.camera.proj)
@@ -115,6 +120,8 @@ class RenderBatch:
             self.vertices[offset + 8] = sprite.sprite.texCoords[i].y
 
             self.vertices[offset + 9] = texID
+            
+            self.vertices[offset + 10] = sprite.entity.ID
             # Load entity id
             # vertices[offset + 9] = sprite.gameObject.getUid() + 1;
 

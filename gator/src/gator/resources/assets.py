@@ -46,5 +46,6 @@ class Assets:
         cls .registerShader("singleSprite", Shader.fromFile("assets/shaders/singleSprite.glsl"))\
             .registerShader("quad", Shader.fromFile("assets/shaders/quad.glsl"))\
             .registerShader("sprite", Shader.fromFile("assets/shaders/sprite.glsl"))\
+            .registerShader("picking", Shader.fromFile("assets/shaders/picking.glsl")) \
             .registerTexture("pygame", Texture("assets/images/test/pygame.png"))\
             .registerTexture("peporito", Texture("assets/images/test/peporito.png"))

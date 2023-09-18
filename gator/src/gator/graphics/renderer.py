@@ -20,7 +20,7 @@ class Renderer:
 
         Renderer.MESH_CONFIG = [Renderer.MAX_BATCH_SIZE*4,  # vertex amount
                                 VertexTypes.FLOAT,  # vertex type
-                                [3, 4, 2, 1],  # vertex attrib counts
+                                [3, 4, 2, 1, 1],  # vertex attrib counts
                                 True,  # static draw
                                 None,  # vertex data
                                 IndexUIntTypes.SHORT,  # index type

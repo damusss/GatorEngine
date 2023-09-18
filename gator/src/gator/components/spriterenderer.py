@@ -65,3 +65,6 @@ class SpriteRenderer(Component):
         if not self.entity._renderbatch:
             return
         self.entity._renderbatch.spriteUpdated(self)
+        
+    def editorUpdate(self):
+        self.update()

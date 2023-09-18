@@ -1,7 +1,7 @@
 import typing
 if typing.TYPE_CHECKING:
-    from ..gator.application import Application
-    from ..geditor.editor import GatorEditor
+    from gator.application import Application
+    from geditor.editor import GatorEditor
 
 
 class Singletons:

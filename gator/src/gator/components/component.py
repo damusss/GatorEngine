@@ -22,7 +22,7 @@ class Component:
 
     @classmethod
     def fromFile(cls, cData):
-        return Component(cData["id"], cData["active"])
+        return cls(cData["id"], cData["active"])
 
     def toFile(self):
         return {
@@ -38,7 +38,7 @@ class Component:
         ...
 
     def editorUpdate(self):
-        self.update()
+        ...
 
     def baseImgui(self):
         if not "UID" in self.hideInProperties:

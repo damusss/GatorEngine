@@ -1,4 +1,5 @@
 import json
+import glm
 import importlib
 
 from gator.core.camera import Camera
@@ -25,8 +26,18 @@ class Scene:
         self.started: bool = False
         self.clearColor = Colors.BLACK
         self.allComponents: list[type[Component]] = defaultComponents
+        self._entityNameCache: dict[str, Entity] = {}
+        self._entityUIDCache: dict[int, Entity] = {}
+        self._entityLayerCache: dict[int, list[Entity]] = {}
 
     def load(self):
+        self.entities = []
+        self.inactiveEntities = []
+        self._entityNameCache = {}
+        self._entityUIDCache = {}
+        self._entityLayerCache = {}
+        for batch in self.renderer.batches:
+            batch.reset()
         with open(f"{Singletons.app.searchPath.replace('.','/')}{Singletons.app.projectName}/{self.name}.ge", "r") as saveFile:
             data = json.load(saveFile)
             self.camera.position = saving.loadVec3(data["camera"]["pos"])
@@ -59,6 +70,8 @@ class Scene:
                         bcid = c.ID
             Entity.GLOBAL_ID = beid+1
             Component.GLOBAL_ID = bcid+1
+            self._entityNameCache[entity.name] = entity
+            self._entityUIDCache[entity.ID] = entity
             events.invoke(events.SCENE_LOADED)
 
     def save(self):
@@ -66,8 +79,8 @@ class Scene:
             "entities": [entity.toFile() for entity in self.entities],
             "inactiveEntities": [entity.toFile() for entity in self.inactiveEntities],
             "camera": {
-                "pos": saving.saveVec3(self.camera.position),
-                "zoom": self.camera.zoom
+                "pos": saving.saveVec3(glm.vec3()),
+                "zoom": 1
             },
             "clearColor": saving.saveVec4(self.clearColor)
         }
@@ -82,21 +95,43 @@ class Scene:
 
     def update(self):
         entitiesToRemove: list[Entity] = []
-        for i in range(len(self.entities)-1):
-            if self.entities[i].dead:
+        for entity in self.entities:
+            if entity.dead:
                 entitiesToRemove.append(entity)
                 continue
-            self.entities[i].update()
+            entity.update()
+            self._entityNameCache[entity.name] = entity
         for entity in entitiesToRemove:
             entity.onDestroy()
             for comp in entity.components:
                 events.invoke(events.COMP_REMOVED, component=comp)
             self.entities.remove(entity)
+            if entity.name in self._entityNameCache:
+                del self._entityNameCache[entity.name]
+            if entity.ID in self._entityUIDCache:
+                del self._entityUIDCache[entity.ID]
+            self._refreshLayerCache()
         self.camera.update()
 
     def editorUpdate(self):
+        entitiesToRemove: list[Entity] = []
         for entity in self.entities:
+            if entity.dead:
+                entitiesToRemove.append(entity)
+                continue
             entity.editorUpdate()
+            self._entityNameCache[entity.name] = entity
+        for entity in entitiesToRemove:
+            entity.onDestroy()
+            for comp in entity.components:
+                events.invoke(events.COMP_REMOVED, component=comp)
+            self.entities.remove(entity)
+            if entity.name in self._entityNameCache:
+                del self._entityNameCache[entity.name]
+            if entity.ID in self._entityUIDCache:
+                del self._entityUIDCache[entity.ID]
+            self._refreshLayerCache()
+        self.camera.update()
 
     def render(self, shader):
         self.renderer.render(shader)
@@ -132,18 +167,32 @@ class Scene:
         return newEntity
 
     def getEntityByID(self, ID: int) -> Entity | None:
+        if ID in self._entityUIDCache:
+            return self._entityUIDCache[ID]
         for entity in self.entities:
-            if entity.ID == ID:
+            if entity.ID == ID and not entity.dead:
                 return entity
         return None
 
     def getEntityByName(self, name: str) -> Entity | None:
+        if name in self._entityNameCache:
+            return self._entityNameCache[name]
         for entity in self.entities:
-            if entity.name == name:
+            if entity.name == name and not entity.dead:
                 return entity
         return None
 
     def getEntitiesOfLayer(self, layer: int) -> list[Entity]:
+        if layer in self._entityLayerCache:
+            return self._entityLayerCache[layer]
         for entity in self.entities:
-            if entity.layer == layer:
+            if entity.layer == layer and not entity.dead:
                 yield entity
+                
+    def _refreshLayerCache(self):
+        self._entityLayerCache = {}
+        for entity in (self.entities+self.inactiveEntities):
+            if entity.dead: continue
+            if entity.layer not in self._entityLayerCache:
+                self._entityLayerCache[entity.layer] = []
+            self._entityLayerCache[entity.layer].append(entity)

@@ -1,9 +1,11 @@
 from OpenGL.GL import *
 import PIL.Image as PillowImage
-
+import ctypes
 
 class Texture:
     def __init__(self, filePath: str):
+        if not filePath: return
+        
         self.assetName = "UnregisteredTexture"
         self.filePath: str = filePath
         pillowImage = PillowImage.open(
@@ -24,6 +26,19 @@ class Texture:
 
         pillowImage.close()
         self.unbind()
+        
+    @classmethod
+    def asFrameBuffer(cls, width, height):
+        self = Texture(None)
+        self.assetName = "[Generated]FramebufferTexture"
+        self.filePath = "[Generated]"
+        self.ID = glGenTextures(1)
+        self.width, self.height = width, height
+        glBindTexture(GL_TEXTURE_2D, self.ID)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, ctypes.c_void_p(0))
+        return self
 
     def destroy(self):
         glDeleteTextures(1, [self.ID])

@@ -1,10 +1,10 @@
 import imgui
 import os
 import gator.common.gimgui as gimgui
+from gator.common.singletons import Singletons
 
 class ProjectSettingsTab:
-    def __init__(self, editor):
-        self.editor = editor
+    def __init__(self):
         self.windowWidth = 1920
         self.windowHeight = 1080
         self.widthAuto = True
@@ -37,7 +37,7 @@ class ProjectSettingsTab:
         self.exportName = data["exportName"]
         
     def getScenes(self):
-        return [file.replace(".ge","") for file in os.listdir(f"projects/{self.editor.app.projectName}") if ".ge" in file]
+        return [file.replace(".ge","") for file in os.listdir(f"projects/{Singletons.editor.app.projectName}") if ".ge" in file]
         
     def imgui(self):
         scenes = self.getScenes()

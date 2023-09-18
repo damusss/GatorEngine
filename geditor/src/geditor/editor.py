@@ -3,16 +3,21 @@ import glfw
 import os
 import json
 import shutil
+import OpenGL.GL as gl
 
 from gator.common.settings import AppSettings, EMPTY_PROJECT_MAIN_SCENE, EMPTY_PROJECT_COMPS_MODULE, EMPTY_PROJECT_CUSTOM_RES, EXPORT_TEMPLATE
 from gator.common.singletons import Singletons
 import gator.common.events as events
 
 from geditor.imguilayer import ImguiLayer
+from geditor.components.editorcamera import EditorCamera
+
 from geditor.tabs.properties import PropertiesTab
 from geditor.tabs.scenesettings import SceneSettingsTab
 from geditor.tabs.menubar import MenuBarTab
 from geditor.tabs.projectsettings import ProjectSettingsTab
+from geditor.tabs.gameview import GameViewTab
+from geditor.tabs.entitylist import EntityListTab
 
 from gator.core.time import Time
 from gator.core.keys import Keyboard
@@ -20,6 +25,7 @@ from gator.core.mouse import Mouse
 
 from gator.resources.assets import Assets
 from gator.graphics.shader import Shader
+from gator.graphics.framebuffer import Framebuffer
 from gator.application import Application
 
 
@@ -30,24 +36,49 @@ class GatorEditor:
         events.register(events.SCENE_SAVED, self.whenSceneSave)
         events.register(events.SCENE_LOADED, self.whenSceneLoad)
         
-        self.projectSettingsTab: ProjectSettingsTab = ProjectSettingsTab(self)
+        self.projectSettingsTab: ProjectSettingsTab = ProjectSettingsTab()
         
         self.app: Application = Application()
         self.app.init(appSettings)
+        
+        self.framebuffer = Framebuffer(1920, 1080)
+        gl.glViewport(0,0,1920,1080)
+        
         self.imguiLayer: ImguiLayer = ImguiLayer(
             self.app.window.width, self.app.window.height, self.app.window.glfwWindow, self.app.window)
         self.inProject: bool = not (
             appSettings.projectName == "none" and appSettings.sceneName == "idle")
+        self._sceneNameBeforePlay = self.app.scene.name
         self.playing = False
 
         self.icProjectName: str = ""
         
+        self.gameViewTab: GameViewTab = GameViewTab()
         self.propertiesTab: PropertiesTab = PropertiesTab()
         self.sceneSettingsTab: SceneSettingsTab = SceneSettingsTab()
-        self.menuBarTab: MenuBarTab = MenuBarTab(self.menuBarSave, self.menuBarOpen, self.menuBarExport, self.menuBarQuit, self)
-
+        self.menuBarTab: MenuBarTab = MenuBarTab(self.menuBarSave, self.menuBarOpen, self.menuBarExport, self.menuBarQuit, self.play, self.stop)
+        self.entityListTab: EntityListTab = EntityListTab()
+        self.editorCamera: EditorCamera = EditorCamera()
+        
         # e = self.app.scene.instantiate("TestObject", 0)
         # e.addComponent(SpriteRenderer(Sprite(Assets.getTexture("pygame")), Colors.CYAN))
+        
+    def play(self):
+        if self.playing: return
+        self._sceneNameBeforePlay = self.app.scene.name
+        self.playing = True
+        self.app.scene.save()
+        self.app.scene.start()
+        events.invoke(events.EDITOR_PLAY)
+        
+    def stop(self):
+        if not self.playing: return
+        self.playing = False
+        if self.app.scene.name != self._sceneNameBeforePlay:
+            self.app.changeScene(self._sceneNameBeforePlay, False)
+        else:
+            self.app.scene.load()
+        events.invoke(events.EDITOR_STOP)
         
     def whenSceneSave(self, event):
         with open(f"projects/{self.app.projectName}/settings.geproject", "w") as settingsFile:
@@ -105,13 +136,22 @@ class GatorEditor:
         glfw.set_window_should_close(self.app.window.glfwWindow, True)
 
     def update(self, shader: Shader):
-        self.app.scene.update()
-        self.app.scene.editorUpdate()
+        self.framebuffer.bind()
+        self.app.window.clear(self.app.scene.clearColor)
+        if self.playing:
+            self.app.scene.update()
+        else:
+            self.app.scene.editorUpdate()
+            self.editorCamera.update()
         self.app.scene.render(shader)
+        self.framebuffer.unbind()
+        
         self.imguiLayer.imgui(self.propertiesTab.imgui,
                               self.sceneSettingsTab.imgui,
                               self.menuBarTab.imgui,
-                              self.projectSettingsTab.imgui)
+                              self.projectSettingsTab.imgui,
+                              self.gameViewTab.imgui,
+                              self.entityListTab.imgui)
 
     def projectSelection(self):
         imgui.begin("Open Project##OpenProjectWindow")
@@ -151,17 +191,17 @@ class GatorEditor:
         found = False
         for file in files:
             if file == "main.ge":
-                self.app.changeScene("main")
+                self.app.changeScene("main", False)
                 found = True
         if not found:
             for file in files:
                 if ".ge" in file:
-                    self.app.changeScene(f"{file.replace('.ge','')}")
+                    self.app.changeScene(f"{file.replace('.ge','')}", False)
                     found = True
         if not found:
             with open(f"projects/{name}/main.ge", "w") as mainSceneFile:
                 mainSceneFile.write(EMPTY_PROJECT_MAIN_SCENE)
-                self.app.changeScene("main")
+                self.app.changeScene("main", False)
                 found = True
         self.inProject = True
 
@@ -179,7 +219,7 @@ class GatorEditor:
             customResFile.write(EMPTY_PROJECT_CUSTOM_RES.replace("<PROJECTNAME>", name))
         with open(f"projects/{name}/settings.geproject", "w") as settingsFile:
             json.dump(self.projectSettingsTab.toFile(), settingsFile)
-        self.app.changeScene("main")
+        self.app.changeScene("main", False)
         self.inProject = True
 
     def run(self):
@@ -193,6 +233,14 @@ class GatorEditor:
             Mouse.frameStart()
             self.app.window.pollEvents()
             self.imguiLayer.frameStart()
+            
+            # glDisable blend
+            # enable Pick texture
+            # viewport 1920 1080
+            # clear
+            # render with picking shader
+            # disable Pick texture
+            # glEnable blend
 
             if self.inProject:
                 self.update(spriteShader)
@@ -210,5 +258,7 @@ class GatorEditor:
         self.destroy()
 
     def destroy(self):
-        self.imguiLayer.destroy()
-        self.app.destroy()
+        try: self.imguiLayer.destroy()
+        except: pass
+        try: self.app.destroy()
+        except: pass

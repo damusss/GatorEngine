@@ -10,6 +10,8 @@ COMP_ADDED: int = auto_event_type()
 COMP_REMOVED: int = auto_event_type()
 SCENE_SAVED: int = auto_event_type()
 SCENE_LOADED: int = auto_event_type()
+EDITOR_PLAY: int = auto_event_type()
+EDITOR_STOP: int = auto_event_type()
 
 
 class Event:

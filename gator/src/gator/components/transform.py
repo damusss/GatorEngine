@@ -44,3 +44,5 @@ class Transform(Component):
             self._lastScale = self.scale.xy
             self._lastRot = self.rotation
         
+    def editorUpdate(self):
+        self.update()

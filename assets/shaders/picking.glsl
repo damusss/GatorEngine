@@ -33,14 +33,16 @@ flat in int fEntityID;
 
 uniform sampler2D uTextures[8];
 
-out vec4 color;
+out vec3 color;
 
 void main() {
+	vec4 col = fCol;
 	if (fTexID > -1) {
-        color = fCol * texture(uTextures[int(fTexID)], fTexCoords);
-    } else {
-        color = fCol;
+        col = fCol * texture(uTextures[int(fTexID)], fTexCoords);
     }
-	if (color.a == 0.0)
+
+	if (col.a == 0.0)
 		discard;
+
+    color = vec3(fEntityID, fEntityID, fEntityID);
 }

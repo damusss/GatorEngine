@@ -26,6 +26,9 @@ class Entity:
         self.transform: Transform = None
         self._renderbatch: RenderBatch = None
         self._batchindex: int = -1
+        self._lastLayer = self.layer
+        Singletons.app.scene._entityUIDCache[self.ID] = self
+        Singletons.app.scene._refreshLayerCache()
 
     def toFile(self) -> dict:
         return {
@@ -79,10 +82,21 @@ class Entity:
             self.components.pop(name)
 
     def editorUpdate(self):
-        for comp in self.components.values():
-            comp.editorUpdate()
+        compsToRemove: list[list[type[Component], Component]] = []
+        for name, comp in self.components.items():
+            if comp.dead:
+                compsToRemove.append([name, comp])
+            if comp.active:
+                comp.editorUpdate()
+        for name, comp in compsToRemove:
+            if (name is Transform):
+                continue
+            comp.onDestroy()
+            events.invoke(events.COMP_REMOVED, component=comp)
+            self.components.pop(name)
 
     def imgui(self):
+        imgui.push_id(f"{self.ID}")
         imgui.text(f"UID: {self.ID}")
         _, self.name = gimgui.inputText("Name", self.name)
         _, self.layer = gimgui.inputInt("Layer", self.layer)
@@ -107,6 +121,7 @@ class Entity:
                 if imgui.menu_item(f"Add {compName}")[0]:
                     self.addComponent(compType())
             imgui.end_popup()
+        imgui.pop_id()
 
     def start(self):
         for comp in self.components.values():
@@ -118,6 +133,7 @@ class Entity:
 
     def kill(self):
         self.dead = True
+        Singletons.app.scene._refreshLayerCache()
         if self in self.scene.inactiveEntities:
             self.scene.inactiveEntities.remove(self)
             self.scene.entities.append(self)

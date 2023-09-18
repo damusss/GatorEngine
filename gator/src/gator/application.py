@@ -29,16 +29,18 @@ class Application:
         self.scene = Scene(appSettings.sceneName)
         self.scene.load()
 
-    def changeScene(self, name: str):
+    def changeScene(self, name: str, start:bool = True):
         if self.scene is not None:
             self.scene.destroy()
         self.scene = Scene(name)
         self.scene.load()
+        if start: self.scene.start()
 
     def run(self):
         beginTime = Time.getTime()
         endTime = Time.getTime()
         spriteShader = Assets.getShader("sprite")
+        self.scene.start()
 
         while not self.window.shouldClose:
             self.window.clear(self.scene.clearColor)
