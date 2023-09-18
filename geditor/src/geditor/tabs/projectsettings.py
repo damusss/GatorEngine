@@ -5,16 +5,16 @@ from gator.common.singletons import Singletons
 
 class ProjectSettingsTab:
     def __init__(self):
-        self.windowWidth = 1920
-        self.windowHeight = 1080
-        self.widthAuto = True
-        self.heightAuto = True
-        self.maximized = True
-        self.windowTitle = "My Game"
-        self.sceneName = "error"
-        self.exportName = "MyGame"
+        self.windowWidth: int = 1920
+        self.windowHeight: int = 1080
+        self.widthAuto: bool = True
+        self.heightAuto: bool = True
+        self.maximized: bool = True
+        self.windowTitle: str = "My Game"
+        self.sceneName: str = "error"
+        self.exportName: str = "MyGame"
         
-    def toFile(self):
+    def toFile(self) -> dict[str, str|int|bool]:
         return {
             "windowWidth": self.windowWidth,
             "windowHeight": self.windowHeight,
@@ -26,7 +26,7 @@ class ProjectSettingsTab:
             "exportName": self.exportName
         }
         
-    def fromFile(self, data:dict):
+    def fromFile(self, data: dict[str, str|int|bool]):
         self.windowWidth = data["windowWidth"]
         self.windowHeight = data["windowHeight"]
         self.widthAuto = data["widthAuto"]
@@ -36,11 +36,9 @@ class ProjectSettingsTab:
         self.sceneName = data["sceneName"]
         self.exportName = data["exportName"]
         
-    def getScenes(self):
-        return [file.replace(".ge","") for file in os.listdir(f"projects/{Singletons.editor.app.projectName}") if ".ge" in file]
         
     def imgui(self):
-        scenes = self.getScenes()
+        scenes = Singletons.editor.getScenes()
         if self.sceneName not in scenes and len(scenes) > 0:
             self.sceneName = scenes[0]
             

@@ -31,8 +31,8 @@ class ImguiLayer:
         self.renderer.process_inputs(Time.dt)
         imgui.push_font(self.editorMainFont)
 
-    def imgui(self, *imgui_funcs):
-        [func() for func in imgui_funcs]
+    def imgui(self, *imgui_tabs):
+        [tab.imgui() for tab in imgui_tabs]
 
     def frameEnd(self):
         imgui.pop_font()

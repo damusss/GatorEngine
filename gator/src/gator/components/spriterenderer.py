@@ -11,7 +11,7 @@ from gator.common.colors import Colors
 
 
 class SpriteRenderer(Component):
-    hideInProperties = ["active", "color", "sprite"]
+    hideInProperties: list[str] = ["active", "color", "sprite"]
 
     def __init__(self, sprite: Sprite = None, color: glm.vec4 = Colors.WHITE, id=None, active=True):
         super().__init__(id, active)

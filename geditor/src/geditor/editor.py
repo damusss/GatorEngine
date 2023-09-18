@@ -56,12 +56,22 @@ class GatorEditor:
         self.gameViewTab: GameViewTab = GameViewTab()
         self.propertiesTab: PropertiesTab = PropertiesTab()
         self.sceneSettingsTab: SceneSettingsTab = SceneSettingsTab()
-        self.menuBarTab: MenuBarTab = MenuBarTab(self.menuBarSave, self.menuBarOpen, self.menuBarExport, self.menuBarQuit, self.play, self.stop)
         self.entityListTab: EntityListTab = EntityListTab()
         self.editorCamera: EditorCamera = EditorCamera()
+        self.menuBarTab: MenuBarTab = MenuBarTab(self.menuBarSave, 
+                                                 self.menuBarOpen, 
+                                                 self.menuBarExport, 
+                                                 self.menuBarQuit, 
+                                                 self.play, 
+                                                 self.stop,
+                                                 self.menuBarCreateScene,
+                                                 self.menuBarLoadScene)
         
         # e = self.app.scene.instantiate("TestObject", 0)
         # e.addComponent(SpriteRenderer(Sprite(Assets.getTexture("pygame")), Colors.CYAN))
+        
+    def getScenes(self) -> list[str]:
+        return [file.replace(".ge","") for file in os.listdir(f"projects/{self.app.projectName}") if file.endswith(".ge")]
         
     def play(self):
         if self.playing: return
@@ -99,6 +109,17 @@ class GatorEditor:
         self.openProject("none")
         self.inProject = False
         self.icProjectName = ""
+        
+    def menuBarLoadScene(self, name):
+        if self.app.scene.name == name: return
+        self.app.scene.save()
+        self.app.changeScene(name, False)
+        
+    def menuBarCreateScene(self, name):
+        self.app.scene.save()
+        with open(f"projects/{self.app.projectName}/{name}.ge", "w") as newSceneFile:
+            newSceneFile.write(EMPTY_PROJECT_MAIN_SCENE)
+        self.app.changeScene(name, False)
         
     def menuBarExport(self):
         self.app.scene.save()
@@ -146,12 +167,12 @@ class GatorEditor:
         self.app.scene.render(shader)
         self.framebuffer.unbind()
         
-        self.imguiLayer.imgui(self.propertiesTab.imgui,
-                              self.sceneSettingsTab.imgui,
-                              self.menuBarTab.imgui,
-                              self.projectSettingsTab.imgui,
-                              self.gameViewTab.imgui,
-                              self.entityListTab.imgui)
+        self.imguiLayer.imgui(self.propertiesTab,
+                              self.sceneSettingsTab,
+                              self.menuBarTab,
+                              self.projectSettingsTab,
+                              self.gameViewTab,
+                              self.entityListTab)
 
     def projectSelection(self):
         imgui.begin("Open Project##OpenProjectWindow")
@@ -253,7 +274,7 @@ class GatorEditor:
             Time.dt = (endTime-beginTime)*Time.scale
             beginTime = endTime
 
-            self.app.window.title = f"Gator Engine Editor [Test] ({Time.getFPS():.0f} FPS)"
+            self.app.window.title = f"Gator Engine Editor [Test] ({Time.getFPS():.0f} FPS) - Editing '{self.app.scene.name}' Scene"
 
         self.destroy()
 

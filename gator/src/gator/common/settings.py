@@ -1,5 +1,3 @@
-
-
 class AppSettings:
     def __init__(self, width: int | str, height: int | str, maximized:bool, title: str, sceneName: str, projectName: str, searchPath: str, allCompsMod, customResMod):
         self.width: int | str = width
@@ -19,6 +17,9 @@ EMPTY_PROJECT_COMPS_MODULE = """# Gator Engine Editor - Auto generated file - Mo
 
 from gator.components.all import *
 # Import your custom components
+# To avoid import issues the import pattern should be the following:
+# from .<customComponentModule> import <CustomComponentClass>
+# Use the same pattern for non-component files aswell.
 
 allComponents = [
     Transform,
@@ -45,6 +46,7 @@ def loadResources():
 """
 
 EXPORT_TEMPLATE = """#########################################################################################################################################
+
 # Gator Engine Editor - Auto generated file - Do not modify
 
 # For this file or the built EXE to run the current working directory must be the directory this file is in.
@@ -71,8 +73,8 @@ from gator.common.settings import AppSettings
 from gator.application import Application
 
 # importing user-customized required project files to avoid dynamic loading
-from <PROJECTNAME> import allComponents
-from <PROJECTNAME> import customResources
+from GatorEngine_<PROJECTNAME> import allComponents
+from GatorEngine_<PROJECTNAME> import customResources
 
 # main function
 def main():

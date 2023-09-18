@@ -28,11 +28,11 @@ class Texture:
         self.unbind()
         
     @classmethod
-    def asFrameBuffer(cls, width, height):
+    def asFrameBuffer(cls, width: int, height: int):
         self = Texture(None)
-        self.assetName = "[Generated]FramebufferTexture"
-        self.filePath = "[Generated]"
-        self.ID = glGenTextures(1)
+        self.assetName: str = "[Generated]FramebufferTexture"
+        self.filePath: str = "[Generated]"
+        self.ID: int = glGenTextures(1)
         self.width, self.height = width, height
         glBindTexture(GL_TEXTURE_2D, self.ID)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)

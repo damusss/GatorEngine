@@ -1,19 +1,19 @@
 from OpenGL.GL import *
 from gator.resources.texture import Texture
-import gator.common.error as error
+#import gator.common.error as error
 
 
 class Framebuffer:
-    def __init__(self, width, height):
+    def __init__(self, width: int, height: int):
         self.width, self.height = width, height
         
-        self.fboID = glGenFramebuffers(1)
+        self.fboID: int = glGenFramebuffers(1)
         glBindFramebuffer(GL_FRAMEBUFFER, self.fboID)
         
-        self.texture:Texture = Texture.asFrameBuffer(width, height)
+        self.texture: Texture = Texture.asFrameBuffer(width, height)
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, self.texture.ID, 0)
         
-        self.rboID = glGenRenderbuffers(1)
+        self.rboID: int = glGenRenderbuffers(1)
         glBindRenderbuffer(GL_RENDERBUFFER, self.rboID)
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, width, height)
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, self.rboID)
@@ -23,8 +23,10 @@ class Framebuffer:
         
     def bind(self):
         glBindFramebuffer(GL_FRAMEBUFFER, self.fboID)
+        return self
     
 
     def unbind(self):
         glBindFramebuffer(GL_FRAMEBUFFER, 0)
+        return self
     

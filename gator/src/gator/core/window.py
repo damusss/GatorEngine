@@ -63,11 +63,13 @@ class Window:
 
     def swapBuffers(self):
         glfw.swap_buffers(self.glfwWindow)
-        
-    def getAspectRatio(self):
+    
+    @property
+    def aspectRatio(self) -> float:
         return self._width/self._height
     
-    def getTargetAspectRatio(self):
+    @property
+    def targetAspectRatio(self) -> float:
         return 16.0/9.0
 
     @property

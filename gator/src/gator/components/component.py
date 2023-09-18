@@ -12,7 +12,7 @@ class Component:
     GLOBAL_ID: int = 0
     hideInProperties: list[str] = []
 
-    def __init__(self, id=None, active=True):
+    def __init__(self, id: int = None, active: bool = True):
         self.ID: int = Component.GLOBAL_ID if not id else id
         if not id:
             Component.GLOBAL_ID += 1
@@ -21,7 +21,7 @@ class Component:
         self.entity: "Entity" = None
 
     @classmethod
-    def fromFile(cls, cData):
+    def fromFile(cls, cData: dict):
         return cls(cData["id"], cData["active"])
 
     def toFile(self):

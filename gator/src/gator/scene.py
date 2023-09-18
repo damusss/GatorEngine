@@ -4,6 +4,7 @@ import importlib
 
 from gator.core.camera import Camera
 from gator.graphics.renderer import Renderer
+from gator.graphics.shader import Shader
 from gator.entity import Entity
 
 from gator.components.transform import Transform
@@ -50,10 +51,16 @@ class Scene:
             for eData in data["entities"]:
                 entity = Entity.fromFile(eData, self.allComponents)
                 self.entities.append(entity)
+                self._entityNameCache[entity.name] = entity
+                self._entityUIDCache[entity.ID] = entity
+                events.invoke(events.ENTITY_CREATED, entity=entity)
             for eData in data["inactiveEntities"]:
                 entity = Entity.fromFile(eData, self.allComponents)
                 self.entities.append(entity)
                 entity.active = False
+                self._entityNameCache[entity.name] = entity
+                self._entityUIDCache[entity.ID] = entity
+                events.invoke(events.ENTITY_CREATED, entity=entity)
             beid = -1
             bcid = -1
             for e in self.entities:
@@ -70,8 +77,6 @@ class Scene:
                         bcid = c.ID
             Entity.GLOBAL_ID = beid+1
             Component.GLOBAL_ID = bcid+1
-            self._entityNameCache[entity.name] = entity
-            self._entityUIDCache[entity.ID] = entity
             events.invoke(events.SCENE_LOADED)
 
     def save(self):
@@ -103,13 +108,14 @@ class Scene:
             self._entityNameCache[entity.name] = entity
         for entity in entitiesToRemove:
             entity.onDestroy()
-            for comp in entity.components:
+            for comp in entity.components.values():
                 events.invoke(events.COMP_REMOVED, component=comp)
             self.entities.remove(entity)
             if entity.name in self._entityNameCache:
                 del self._entityNameCache[entity.name]
             if entity.ID in self._entityUIDCache:
                 del self._entityUIDCache[entity.ID]
+            events.invoke(events.ENTITY_KILLED, entity=entity)
             self._refreshLayerCache()
         self.camera.update()
 
@@ -123,17 +129,18 @@ class Scene:
             self._entityNameCache[entity.name] = entity
         for entity in entitiesToRemove:
             entity.onDestroy()
-            for comp in entity.components:
+            for comp in entity.components.values():
                 events.invoke(events.COMP_REMOVED, component=comp)
             self.entities.remove(entity)
             if entity.name in self._entityNameCache:
                 del self._entityNameCache[entity.name]
             if entity.ID in self._entityUIDCache:
                 del self._entityUIDCache[entity.ID]
+            events.invoke(events.ENTITY_KILLED, entity=entity)
             self._refreshLayerCache()
         self.camera.update()
 
-    def render(self, shader):
+    def render(self, shader: Shader):
         self.renderer.render(shader)
 
     def destroy(self):
@@ -148,6 +155,7 @@ class Scene:
         if self.started:
             entity.start()
         self.entities.append(entity)
+        events.invoke(events.ENTITY_CREATED, entity=entity)
         return entity
 
     def duplicate(self, entity: Entity) -> Entity:
@@ -164,6 +172,7 @@ class Scene:
             self.entities.append(newEntity)
         else:
             self.inactiveEntities.append(newEntity)
+        events.invoke(events.ENTITY_CREATED, entity=entity)
         return newEntity
 
     def getEntityByID(self, ID: int) -> Entity | None:

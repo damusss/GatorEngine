@@ -5,7 +5,7 @@ import gator.common.saving as saving
 
 
 class Transform(Component):
-    hideInProperties = ["active"]
+    hideInProperties: list[str] = ["active"]
     
     def __init__(self, id=None, active=True):
         super().__init__(id, active)

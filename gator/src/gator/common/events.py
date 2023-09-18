@@ -12,6 +12,8 @@ SCENE_SAVED: int = auto_event_type()
 SCENE_LOADED: int = auto_event_type()
 EDITOR_PLAY: int = auto_event_type()
 EDITOR_STOP: int = auto_event_type()
+ENTITY_CREATED: int = auto_event_type()
+ENTITY_KILLED: int = auto_event_type()
 
 
 class Event:
