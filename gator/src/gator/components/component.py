@@ -21,7 +21,7 @@ class Component:
         self.entity: "Entity" = None
 
     @classmethod
-    def fromFile(cls, cData: dict):
+    def fromFile(cls, cData: dict, entity: "Entity"):
         return cls(cData["id"], cData["active"])
 
     def toFile(self):
@@ -30,6 +30,9 @@ class Component:
             "active": self.active,
             "type": self.__class__.__name__
         }
+        
+    def init(self):
+        ...
 
     def start(self):
         ...
@@ -41,8 +44,6 @@ class Component:
         ...
 
     def baseImgui(self):
-        if not "UID" in self.hideInProperties:
-            imgui.text(f"UID: {self.ID}")
         if not "active" in self.hideInProperties:
             _, self.active = gimgui.checkbox("Active", self.active)
         for name, value in list(vars(self).items()):
@@ -51,13 +52,11 @@ class Component:
                     not name in self.hideInProperties and \
                     not name in ["ID", "active", "dead", "entity", "GLOBAL_ID", "hideInProperties"] and \
                     not name.startswith("_") and \
-                    not name.lower().startswith("ic"):
+                    not name.lower().startswith("ic") and \
+                    not name.lower().startswith("ge"):
+            
 
                 originalName = name
-                for prefix in ["ge_", "GE_", "ge", "GE"]:
-                    if name.startswith(prefix):
-                        name = name.replace(prefix, "", 1)
-                        break
                 if "_" in name:
                     name = name.replace("_", " ").title()
                 else:
@@ -81,9 +80,20 @@ class Component:
                     case list() | tuple():
                         value = gimgui.iterable(name, value)
                 setattr(self, originalName, value)
+        
 
     def imgui(self):
         self.baseImgui()
+        self.endImgui()
+        
+    def endImgui(self):
+        if not "UID" in self.hideInProperties:
+            imgui.text(f"UID: {self.ID}")
+            
+        if self.__class__.__name__ != "Transform":
+            imgui.same_line()
+            if imgui.button("Remove"):
+                self.kill()
 
     def onDestroy(self):
         ...

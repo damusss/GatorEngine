@@ -1,9 +1,12 @@
 import imgui, glm
-from gator.common.singletons import Singletons
-from gator.entity import Entity
 
-# temp
+from gator.entity import Entity
+from gator.core.mouse import Mouse
+
+from gator.common.singletons import Singletons
 import gator.common.events as events
+from gator.common.settings import WINDOW_FLAGS, COLUMN_DIVIDER
+from gator.common.gimgui import Tracker
 
 
 class PropertiesTab:
@@ -33,14 +36,22 @@ class PropertiesTab:
         self.selectedEntity = entity
         if Singletons.editor.playing:
             self._enityIDBeforePlay = self.selectedEntity.ID if self.selectedEntity else None
+            
+    def update(self):
+        if not Singletons.editor.gameViewTab.hovered: return
+        if Mouse.getButtonDown(Mouse.buttons.MOUSE_BUTTON_LEFT):
+            projected = Singletons.editor.gameViewTab.viewportMouseWorldPos
+            for entity in sorted(Singletons.app.scene.entities, key=lambda e: -e.transform.position.z):
+                if abs(projected.x-entity.transform.position.x) <= entity.transform.scale.x/2 and abs(projected.y-entity.transform.position.y) <= entity.transform.scale.y/2:
+                    self.setSelected(entity)
+                    return
         
     def imgui(self):
-        imgui.begin("Entity Properties##EntityPropertiesWindow")
+        imgui.set_next_window_position(0,Tracker.menuBarH)
+        imgui.set_next_window_size(Singletons.app.window._width//COLUMN_DIVIDER, (Singletons.app.window._height-Tracker.menuBarH)//2)
+        imgui.begin("Entity Properties##EntityPropertiesWindow", False, WINDOW_FLAGS)
         if self.selectedEntity:
             self.selectedEntity.imgui()
-            if Singletons.editor.gameViewTab.hovered:
-                vmwp = Singletons.editor.gameViewTab.viewportMouseWorldPos
-                self.selectedEntity.transform.position = glm.vec3(vmwp.x, vmwp.y, 0)
         else:
             imgui.text("No entity selected")
         imgui.end()

@@ -10,6 +10,7 @@ MAX_VALUE = 100
 
 class Tracker:
     stolenPopup = False
+    menuBarH = 0
 
 
 def leftCol(label: str):
@@ -27,14 +28,14 @@ def columnsEnd():
 
 def inputFloat(label: str, value: float) -> tuple[bool, float]:
     leftCol(label)
-    changed, val = imgui.input_float(f"##{label}:inputFloat", value)
+    changed, val = imgui.input_float(f"##{label}:inputFloat", float(value))
     columnsEnd()
     return changed, val
 
 
 def dragFloat(label: str, value: float, speed: float = FLOAT_SPEED) -> tuple[bool, float]:
     leftCol(label)
-    changed, val = imgui.drag_float(f"##{label}:dragFloat", value, speed)
+    changed, val = imgui.drag_float(f"##{label}:dragFloat", float(value), float(speed))
     columnsEnd()
     return changed, val
 
@@ -42,7 +43,7 @@ def dragFloat(label: str, value: float, speed: float = FLOAT_SPEED) -> tuple[boo
 def sliderFloat(label: str, value: float, min: float = MIN_VALUE, max: float = MAX_VALUE) -> tuple[bool, float]:
     leftCol(label)
     changed, val = imgui.slider_float(
-        f"##{label}:sliderFloat", value, min, max)
+        f"##{label}:sliderFloat", float(value), float(min), float(max))
     columnsEnd()
     return changed, val
 
@@ -150,21 +151,21 @@ def enumDropdown(label: str, options: list[str], selected: str) -> tuple[bool, s
 
 def inputInt(label: str, value: int) -> tuple[bool, int]:
     leftCol(label)
-    changed, val = imgui.input_int(f"##{label}:inputInt", value)
+    changed, val = imgui.input_int(f"##{label}:inputInt", int(value))
     columnsEnd()
     return changed, val
 
 
 def dragInt(label: str, value: int, speed: int = INT_SPEED) -> tuple[bool, int]:
     leftCol(label)
-    changed, val = imgui.drag_int(f"##{label}:dragInt", value, speed)
+    changed, val = imgui.drag_int(f"##{label}:dragInt", int(value), int(speed))
     columnsEnd()
     return changed, val
 
 
 def sliderInt(label: str, value: int, min: int = MIN_VALUE, max: int = MAX_VALUE) -> tuple[bool, int]:
     leftCol(label)
-    changed, val = imgui.slider_int(f"##{label}:sliderInt", value, min, max)
+    changed, val = imgui.slider_int(f"##{label}:sliderInt", int(value), int(min), int(max))
     columnsEnd()
     return changed, val
 
@@ -188,6 +189,6 @@ def inputText(label: str, text: str) -> tuple[bool, str]:
 
 def checkbox(label: str, value: bool) -> tuple[bool, bool]:
     leftCol(label)
-    changed, val = imgui.checkbox(f"##{label}:checkbox", value)
+    changed, val = imgui.checkbox(f"##{label}:checkbox", bool(value))
     columnsEnd()
     return changed, val

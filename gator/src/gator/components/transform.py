@@ -27,7 +27,7 @@ class Transform(Component):
         return base
     
     @classmethod
-    def fromFile(cls, cData):
+    def fromFile(cls, cData, entity):
         t = Transform(cData["id"], cData["active"])
         t.position = saving.loadVec3(cData["position"])
         t.scale = saving.loadVec2(cData["scale"])

@@ -1,42 +1,51 @@
 import gator.common.events as events
 
-from gator.components.spriterenderer import SpriteRenderer
+from gator.components.shaderrenderer import ShaderRenderer
 from gator.components.component import Component
 
 from gator.graphics.mesh import VertexTypes, IndexUIntTypes
-from gator.graphics.renderbatch import RenderBatch
+from gator.graphics.customrenderbatch import CustomRenderBatch
 from gator.graphics.shader import Shader
 
+from gator.resources.assets import Assets
+from gator.core.time import Time
 
-class Renderer:
+class CustomRenderer:
     MAX_BATCH_SIZE: int = 1000
     MAX_TEXTURES: int = 8
     MESH_CONFIG: list[int, str, list[int], bool,
                       list[float] | None, str, list[int]] = []
-
+    
+    UNIFORM_LOADERS = {}
+    
     def __init__(self):
         events.register(events.COMP_ADDED, self.whenCompAdded)
         events.register(events.COMP_REMOVED, self.whenCompRemoved)
-
-        Renderer.MESH_CONFIG = [Renderer.MAX_BATCH_SIZE*4,  # vertex amount
+        
+        CustomRenderer.MESH_CONFIG = [CustomRenderer.MAX_BATCH_SIZE*4,  # vertex amount
                                 VertexTypes.FLOAT,  # vertex type
-                                [3, 4, 2, 1],  # vertex attrib counts
+                                [3, 4],  # vertex attrib counts
                                 False,  # static draw
                                 None,  # vertex data
                                 IndexUIntTypes.SHORT,  # index type
                                 self.genIndices()  # indice
                                 ]
 
-        self.batches: list[RenderBatch] = []
-        self.currentShader: Shader = None
-
-    def render(self, shader: Shader):
-        self.currentShader = shader
-        self.currentShader.use()
+        self.batches: list[CustomRenderBatch] = []
+        self.registerUniformLoader("exampleCustom", self.exampleCustomUniformLoader)
+            
+    @staticmethod
+    def exampleCustomUniformLoader(shader: Shader):
+        shader.uniform1F("uTime", Time.getTime())
+    
+    @classmethod
+    def registerUniformLoader(cls, shaderName, uniformLoaderFunc):
+        cls.UNIFORM_LOADERS[shaderName] = uniformLoaderFunc
+        
+    def render(self):
         for batch in self.batches:
-            batch.render(self.currentShader)
-        self.currentShader.detach()
-
+            batch.render()
+            
     def genIndices(self) -> list[int]:
         elements = [0 for i in range(6*self.MAX_BATCH_SIZE)]
         for i in range(self.MAX_BATCH_SIZE):
@@ -55,37 +64,37 @@ class Renderer:
         elements[offsetArrayIndex + 3] = offset + 0
         elements[offsetArrayIndex + 4] = offset + 2
         elements[offsetArrayIndex + 5] = offset + 1
-
+        
     def destroy(self):
         for batch in self.batches:
             batch.destroy()
 
     def whenCompAdded(self, event: events.Event):
         self.addComponent(event.component)
-            
-    def addComponent(self, component: Component):
-        if not isinstance(component, SpriteRenderer):
-            return
-        added = False
-        for batch in self.batches:
-            if batch.hasRoom():
-                tex = component.sprite.texture
-                if (tex is None or (batch.hasTexture(tex) and batch.hasTextureRoom())):
-                    batch.add(component)
-                    added = True
-                    break
-        if not added:
-            newBatch = RenderBatch(self.MAX_BATCH_SIZE,
-                                   self.MAX_TEXTURES, self.MESH_CONFIG)
-            newBatch.add(component)
-            self.batches.append(newBatch)
-
+        
     def whenCompRemoved(self, event: events.Event):
         self.removeComponent(event.component)
-            
+        
     def removeComponent(self, component:Component):
-        if not isinstance(component, SpriteRenderer):
+        if not isinstance(component, ShaderRenderer):
             return
         for batch in self.batches:
             if batch.tryRemove(component):
                 break
+        
+    def addComponent(self, component: Component):
+        if not isinstance(component, ShaderRenderer):
+            return
+        added = False
+        for batch in self.batches:
+            if batch.hasRoom():
+                shader = component.shader
+                if (batch.shader is None or batch.shader.assetName == shader.assetName):
+                    batch.shader = component.shader
+                    batch.add(component)
+                    added = True
+                    break
+        if not added:
+            newBatch = CustomRenderBatch(self.MAX_BATCH_SIZE, self.MESH_CONFIG, component.shader)
+            newBatch.add(component)
+            self.batches.append(newBatch)

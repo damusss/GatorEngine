@@ -3,6 +3,8 @@ import imgui
 from gator.common.singletons import Singletons
 from gator.components.spriterenderer import SpriteRenderer
 from gator.resources.sprite import Sprite
+from gator.common.settings import WINDOW_FLAGS, COLUMN_DIVIDER
+from gator.common.gimgui import Tracker
 
 
 class EntityListTab:
@@ -10,7 +12,9 @@ class EntityListTab:
         self.propertiesTab = Singletons.editor.propertiesTab
         
     def imgui(self):
-        imgui.begin("Entity List##EntityListTabWindow")
+        imgui.set_next_window_position(0, (Singletons.app.window._height-Tracker.menuBarH)//2+Tracker.menuBarH)
+        imgui.set_next_window_size(Singletons.app.window._width//COLUMN_DIVIDER, (Singletons.app.window._height-Tracker.menuBarH)//2)
+        imgui.begin("Entities##EntityListTabWindow", False, WINDOW_FLAGS)
         if imgui.collapsing_header("Active")[0]:
             for entity in Singletons.app.scene.entities:
                 if imgui.button(f"{entity.name} ({entity.ID})"):

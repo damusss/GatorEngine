@@ -3,6 +3,7 @@ import glm
 from gator.resources.assets import Assets
 from gator.resources.texture import Texture
 from gator.resources.sprite import Sprite
+from gator.graphics.shader import Shader
 
 
 def saveVec2(vec: glm.vec2) -> list[float]:
@@ -55,3 +56,10 @@ def loadSprite(sprite: dict[str, list[list[float]] | str]) -> Sprite:
         loadTexture(sprite["texture"]),
         [loadVec2(coord) for coord in sprite["texCoords"]]
     )
+
+
+def saveShader(shader: Shader) -> str:
+    return shader.assetName
+
+def loadShader(shader: str) -> Shader:
+    return Assets.getShader(shader)

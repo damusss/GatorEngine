@@ -8,6 +8,7 @@ import OpenGL.GL as gl
 from gator.common.settings import AppSettings, EMPTY_PROJECT_MAIN_SCENE, EMPTY_PROJECT_COMPS_MODULE, EMPTY_PROJECT_CUSTOM_RES, EXPORT_TEMPLATE
 from gator.common.singletons import Singletons
 import gator.common.events as events
+from gator.common.colors import Colors
 
 from geditor.imguilayer import ImguiLayer
 from geditor.components.editorcamera import EditorCamera
@@ -53,7 +54,7 @@ class GatorEditor:
 
         self.icProjectName: str = ""
         
-        self.gameViewTab: GameViewTab = GameViewTab()
+        self.gameViewTab: GameViewTab = GameViewTab(self.play, self.stop,)
         self.propertiesTab: PropertiesTab = PropertiesTab()
         self.sceneSettingsTab: SceneSettingsTab = SceneSettingsTab()
         self.entityListTab: EntityListTab = EntityListTab()
@@ -62,8 +63,6 @@ class GatorEditor:
                                                  self.menuBarOpen, 
                                                  self.menuBarExport, 
                                                  self.menuBarQuit, 
-                                                 self.play, 
-                                                 self.stop,
                                                  self.menuBarCreateScene,
                                                  self.menuBarLoadScene)
         
@@ -167,6 +166,7 @@ class GatorEditor:
         self.app.scene.render(shader)
         self.framebuffer.unbind()
         
+        self.propertiesTab.update()
         self.imguiLayer.imgui(self.propertiesTab,
                               self.sceneSettingsTab,
                               self.menuBarTab,
@@ -249,7 +249,7 @@ class GatorEditor:
         spriteShader = Assets.getShader("sprite")
 
         while not self.app.window.shouldClose:
-            self.app.window.clear(self.app.scene.clearColor)
+            self.app.window.clear(Colors.BLACK)
             Keyboard.frameStart()
             Mouse.frameStart()
             self.app.window.pollEvents()
@@ -274,7 +274,7 @@ class GatorEditor:
             Time.dt = (endTime-beginTime)*Time.scale
             beginTime = endTime
 
-            self.app.window.title = f"Gator Engine Editor [Test] ({Time.getFPS():.0f} FPS) - Editing '{self.app.scene.name}' Scene"
+            self.app.window.title = f"Gator Editor - Editing Scene '{self.app.scene.name}' ({Time.getFPS():.0f} FPS)"
 
         self.destroy()
 

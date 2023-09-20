@@ -8,6 +8,7 @@ import gator.common.error as error
 class Shader:
     def __init__(self, vertexSource: str, fragmentSource: str):
         self.ID: int = glCreateProgram()
+        self.assetName = "UnregisteredShader"
 
         vertID = singleShaderBuilderHelper(GL_VERTEX_SHADER, vertexSource)
         fragID = singleShaderBuilderHelper(GL_FRAGMENT_SHADER, fragmentSource)

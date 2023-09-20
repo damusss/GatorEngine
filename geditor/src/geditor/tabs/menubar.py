@@ -1,14 +1,13 @@
 import imgui
 from gator.common.singletons import Singletons
+from gator.common.gimgui import Tracker
 
 class MenuBarTab:
-    def __init__(self, saveFunc, openFunc, exportFunc, quitFunc, playFunc, stopFunc, createSceneFunc, loadSceneFunc):
+    def __init__(self, saveFunc, openFunc, exportFunc, quitFunc, createSceneFunc, loadSceneFunc):
         self.saveFunc = saveFunc
         self.openFunc = openFunc
         self.exportFunc = exportFunc
         self.quitFunc = quitFunc
-        self.playFunc = playFunc
-        self.stopFunc = stopFunc
         self.createSceneFunc = createSceneFunc
         self.loadSceneFunc = loadSceneFunc
         
@@ -16,6 +15,7 @@ class MenuBarTab:
         
     def imgui(self):
         if imgui.begin_main_menu_bar():
+            Tracker.menuBarH = imgui.get_window_size()[1]
             if imgui.begin_menu("File"):
                 if not Singletons.editor.playing and imgui.menu_item("Save")[0]:
                     self.saveFunc()
@@ -40,8 +40,5 @@ class MenuBarTab:
                     self.createSceneFunc(self.icSceneName)
                 imgui.text("To delete a scene delete the <name>.ge file")
                 imgui.end_menu()
-            if imgui.button("Play"):
-                self.playFunc()
-            if imgui.button("Stop"):
-                self.stopFunc()
+            
             imgui.end_main_menu_bar()

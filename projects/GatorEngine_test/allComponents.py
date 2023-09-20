@@ -1,8 +1,7 @@
-from gator.components.all import *
+from gator.components.all import defaultComponents
 from .testcomp import TestComp
 
 allComponents = [
-    Transform,
-    SpriteRenderer,
+    *defaultComponents,
     TestComp
 ]

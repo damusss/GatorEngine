@@ -4,6 +4,7 @@ import importlib
 
 from gator.core.camera import Camera
 from gator.graphics.renderer import Renderer
+from gator.graphics.customrenderer import CustomRenderer
 from gator.graphics.shader import Shader
 from gator.entity import Entity
 
@@ -22,6 +23,7 @@ class Scene:
         self.name: str = name
         self.camera: Camera = Camera()
         self.renderer: Renderer = Renderer()
+        self.customRenderer: CustomRenderer = CustomRenderer()
         self.entities: list[Entity] = []
         self.inactiveEntities: list[Entity] = []
         self.started: bool = False
@@ -38,6 +40,8 @@ class Scene:
         self._entityUIDCache = {}
         self._entityLayerCache = {}
         for batch in self.renderer.batches:
+            batch.reset()
+        for batch in self.customRenderer.batches:
             batch.reset()
         with open(f"{Singletons.app.searchPath.replace('.','/')}{Singletons.app.projectName}/{self.name}.ge", "r") as saveFile:
             data = json.load(saveFile)
@@ -142,9 +146,11 @@ class Scene:
 
     def render(self, shader: Shader):
         self.renderer.render(shader)
+        self.customRenderer.render()
 
     def destroy(self):
         self.renderer.destroy()
+        self.customRenderer.destroy()
         for entity in self.entities:
             entity.onDestroy()
 
@@ -180,6 +186,7 @@ class Scene:
             return self._entityUIDCache[ID]
         for entity in self.entities:
             if entity.ID == ID and not entity.dead:
+                self._entityUIDCache[ID] = entity
                 return entity
         return None
 
@@ -188,14 +195,18 @@ class Scene:
             return self._entityNameCache[name]
         for entity in self.entities:
             if entity.name == name and not entity.dead:
+                self._entityNameCache[name] = entity
                 return entity
         return None
 
     def getEntitiesOfLayer(self, layer: int) -> list[Entity]:
         if layer in self._entityLayerCache:
             return self._entityLayerCache[layer]
+        else:
+            self._entityLayerCache[layer] = []
         for entity in self.entities:
             if entity.layer == layer and not entity.dead:
+                self._entityLayerCache[layer].append(entity)
                 yield entity
                 
     def _refreshLayerCache(self):

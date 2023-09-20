@@ -1,3 +1,5 @@
+import imgui
+
 class AppSettings:
     def __init__(self, width: int | str, height: int | str, maximized:bool, title: str, sceneName: str, projectName: str, searchPath: str, allCompsMod, customResMod):
         self.width: int | str = width
@@ -9,21 +11,25 @@ class AppSettings:
         self.searchPath: str = searchPath
         self.allCompsMod = allCompsMod
         self.customResMod = customResMod
+        
+CONFIG_WINDOWS = False
+WINDOW_FLAGS = imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_RESIZE if not CONFIG_WINDOWS else imgui.NONE
 
+COLUMN_DIVIDER = 4.7
+HEIGHT_DIVIDER = 3.5
 
 EMPTY_PROJECT_MAIN_SCENE = '{"entities": [], "inactiveEntities": [], "camera": {"pos": [0.0, 0.0, 0.0], "zoom": 1}, "clearColor": [0.0, 0.0, 0.0, 1.0]}'
 
 EMPTY_PROJECT_COMPS_MODULE = """# Gator Engine Editor - Auto generated file - Modify with custom components
 
-from gator.components.all import *
+from gator.components.all import defaultComponents
 # Import your custom components
 # To avoid import issues the import pattern should be the following:
 # from .<customComponentModule> import <CustomComponentClass>
 # Use the same pattern for non-component files aswell.
 
 allComponents = [
-    Transform,
-    SpriteRenderer,
+    *defaultComponents,
     # Add your components to this list
 ]
 """
@@ -31,12 +37,14 @@ allComponents = [
 EMPTY_PROJECT_CUSTOM_RES = """# Gator Engine Editor - Auto generated file - Modify loading custom resources
 
 from gator.resources.texture import Texture
+from gator.graphics.shader import Shader
 from gator.resources.assets import Assets
 
 # User must use this constants as the might be modified at export time for them to work properly
 PROJECT_PATH = "projects/<PROJECTNAME>/"
 ASSETS_PATH = PROJECT_PATH+"assets/"
 IMAGES_PATH = ASSETS_PATH+"images/"
+SHADERS_PATH = ASSETS_PATH+"shaders/"
 
 def loadResources():
     # Resource loading example:

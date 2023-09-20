@@ -6,6 +6,7 @@ from gator.components.transform import Transform
 from gator.common.singletons import Singletons
 import gator.common.events as events
 import gator.common.gimgui as gimgui
+import gator.common.error as error
 
 from gator.graphics.renderbatch import RenderBatch
 
@@ -46,15 +47,21 @@ class Entity:
         for cData in eData["components"]:
             for compType in allComps:
                 if compType.__name__ == cData["type"]:
-                    comp = compType.fromFile(cData)
-                    entity.addComponent(comp)
-                    if compType.__name__ == "Transform":
-                        entity.transform = comp
+                    try:
+                        comp = compType.fromFile(cData, entity)
+                    except Exception as e:
+                        error.warning(error.GatorError, f"Could not load component '{eData['name']}:{compType.__name__}' from scene file '{Singletons.app.projectName}:{Singletons.app.scene.name}.ge'. The component will be skipped. Error details:\n{e}")
+                        break
+                    else:
+                        entity.addComponent(comp)
+                        if compType.__name__ == "Transform":
+                            entity.transform = comp
         return entity
 
     def addComponent(self, component: Component) -> Component:
         self.components[component.__class__] = component
         component.entity = self
+        component.init()
         if Singletons.app.scene.started:
             component.start()
         events.invoke(events.COMP_ADDED, component=component)
@@ -156,10 +163,12 @@ class Entity:
                 self.scene.entities.append(self)
                 for comp in self.components.values():
                     Singletons.app.scene.renderer.addComponent(comp)
+                    Singletons.app.scene.customRenderer.addComponent(comp)
         else:
             if self in self.scene.entities:
                 self.scene.entities.remove(self)
                 self.scene.inactiveEntities.append(self)
                 for comp in self.components.values():
                     Singletons.app.scene.renderer.removeComponent(comp)
+                    Singletons.app.scene.customRenderer.removeComponent(comp)
                 self.dirty = True

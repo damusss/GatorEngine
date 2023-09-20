@@ -21,7 +21,7 @@ class EditorCamera:
                                                                           0))
                         + Singletons.app.scene.camera.projCenter) * glm.normalize(Singletons.app.scene.camera.projSize).yxz
 
-            Singletons.app.scene.camera.position -= worldRel * \
+            Singletons.app.scene.camera.position += worldRel * \
                 self.dragSpeed*(1/Singletons.app.scene.camera.zoom)
         Singletons.app.scene.camera.zoom += Mouse.scrollDelta.y*Time.dt * \
             math.exp(Singletons.app.scene.camera.zoom)*self.zoomSpeed

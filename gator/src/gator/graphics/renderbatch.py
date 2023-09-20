@@ -13,7 +13,7 @@ from gator.components.spriterenderer import SpriteRenderer
 
 
 class RenderBatch:
-    VERTEX_SIZE: int = 11
+    VERTEX_SIZE: int = 10
 
     def __init__(self, maxSprites: int, maxTexures: int, meshConfig: list[int, str, list[int], bool, list[float] | None, str, list[int]]):
         self.maxSprites: int = maxSprites
@@ -52,8 +52,7 @@ class RenderBatch:
         if sprite.sprite.texture is None:
             return
         self.tryRemove(sprite)
-        Singletons.app.scene.renderer.whenCompAdded(
-            events.Event(events.COMP_ADDED, -1, component=sprite))
+        Singletons.app.scene.renderer.addComponent(sprite)
 
     def add(self, sprite: SpriteRenderer):
         index = len(self.sprites)
@@ -120,10 +119,6 @@ class RenderBatch:
             self.vertices[offset + 8] = sprite.sprite.texCoords[i].y
 
             self.vertices[offset + 9] = texID
-            
-            self.vertices[offset + 10] = sprite.entity.ID
-            # Load entity id
-            # vertices[offset + 9] = sprite.gameObject.getUid() + 1;
 
             offset += self.VERTEX_SIZE
 

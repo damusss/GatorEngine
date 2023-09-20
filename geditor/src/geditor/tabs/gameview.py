@@ -3,17 +3,32 @@ import glm
 
 from gator.common.singletons import Singletons
 from gator.core.mouse import Mouse
+from gator.common.settings import WINDOW_FLAGS, COLUMN_DIVIDER
+from gator.common.gimgui import Tracker
 
 
 class GameViewTab:
-    def __init__(self):
+    def __init__(self, playFunc, stopFunc):
         self.hovered: bool = False
         self.viewportW = self.viewportH = self.posX = self.posY = self.viewportX = self.viewportY = 0
         self.viewportMousePos, self.viewportMouseWorldPos = glm.vec2(), glm.vec2()
+        self.playFunc = playFunc
+        self.stopFunc = stopFunc
 
     def imgui(self):
-        imgui.begin("Game", imgui.WINDOW_MENU_BAR |
-                    imgui.WINDOW_NO_SCROLL_WITH_MOUSE | imgui.WINDOW_NO_SCROLLBAR)
+        imgui.set_next_window_position(Singletons.app.window._width//COLUMN_DIVIDER, Tracker.menuBarH*2)
+        imgui.set_next_window_size(Singletons.app.window._width-(Singletons.app.window._width//COLUMN_DIVIDER),
+                                   Singletons.app.window._height-(Tracker.menuBarH*2))
+        imgui.begin("Game##GameViewWindowTab", False, imgui.WINDOW_MENU_BAR |
+                    imgui.WINDOW_NO_SCROLL_WITH_MOUSE | imgui.WINDOW_NO_SCROLLBAR | WINDOW_FLAGS)
+        if imgui.begin_menu_bar():
+            if imgui.button("Play"):
+                    self.playFunc()
+            if imgui.button("Stop"):
+                self.stopFunc()
+            if Singletons.editor.playing:
+                imgui.text("Playing")
+            imgui.end_menu_bar()
 
         self.viewportX, self.viewportY = imgui.get_window_position()
         self.viewportW, self.viewportH = self.getSize()
@@ -46,4 +61,4 @@ class GameViewTab:
 
         viewportX = (availW/2)-(aspectW/2)
         viewportY = (availH/2)-(aspectH/2)
-        return (viewportX+imgui.get_cursor_pos_x()), (viewportY+imgui.get_cursor_pos_y())
+        return (viewportX+imgui.get_cursor_pos_x()), (viewportY+imgui.get_cursor_pos_y()-Tracker.menuBarH)

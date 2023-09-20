@@ -1,0 +1,14 @@
+TODO:
+- gizmos
+- debug draw
+- texture to sprite drag drop editor
+- transform parenting
+
+WAITING:
+- make docking work
+- physics?
+- font rendering??
+
+DONE:
+- temp: fix window position
+- shader renderer

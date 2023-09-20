@@ -2,9 +2,6 @@ import glm
 from gator.core.mouse import Mouse
 from gator.common.singletons import Singletons
 
-# CAMERA ISSUES IN THIS FILE
-
-
 class Camera:
     def __init__(self):
         self.position: glm.vec3 = glm.vec3(0, 0, 0)
@@ -21,7 +18,7 @@ class Camera:
 
     def update(self):
         self.view = glm.translate(glm.scale(glm.mat4(1.0), glm.vec3(
-            self.zoom, self.zoom, 1)), self.position)
+            self.zoom, self.zoom, 1)), -self.position)
         self.inverseView: glm.mat4x4 = glm.inverse(self.view)
         self.mousePosWorld = self.screenToWorld(
             glm.vec3(Mouse.mousePos.x, Mouse.mousePos.y, 0))
@@ -30,12 +27,10 @@ class Camera:
         vec = glm.vec4(
             (2*((position.x-0)/(Singletons.app.window._width-0)))-1,
             (2*((position.y-0)/(Singletons.app.window._height-0)))-1,
-            0,
-            1.0
+            0.0, 1.0
         )
-        pos = self.inverseView*self.inverseProj*vec
-        pos.z = 0
-        return glm.vec3(pos.x, pos.y, pos.z)
+        pos = self.inverseProj*self.inverseView*vec
+        return glm.vec3(pos.x, pos.y, 0)
 
     def worldToScreen(self, position: glm.vec2 | glm.vec2) -> glm.vec3:
         ndcSpacePos = glm.vec4(position.x, position.y, 0, 1)

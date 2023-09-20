@@ -2,6 +2,8 @@ import imgui
 import os
 import gator.common.gimgui as gimgui
 from gator.common.singletons import Singletons
+from gator.common.settings import WINDOW_FLAGS, COLUMN_DIVIDER, HEIGHT_DIVIDER
+from gator.common.gimgui import Tracker
 
 class ProjectSettingsTab:
     def __init__(self):
@@ -41,8 +43,11 @@ class ProjectSettingsTab:
         scenes = Singletons.editor.getScenes()
         if self.sceneName not in scenes and len(scenes) > 0:
             self.sceneName = scenes[0]
-            
-        imgui.begin("Project Settings##ProjectSettingsTab")
+        
+        winW = (Singletons.app.window._width-(Singletons.app.window._width//COLUMN_DIVIDER))//2
+        imgui.set_next_window_position(Singletons.app.window._width//COLUMN_DIVIDER+winW, Tracker.menuBarH)
+        imgui.set_next_window_size(winW, Singletons.app.window._height//HEIGHT_DIVIDER)
+        imgui.begin("Project Settings##ProjectSettingsTab", False, WINDOW_FLAGS)
         if len(scenes) <= 0:
             imgui.text("Error: At least one scene must exist to edit project settings")
             imgui.end()

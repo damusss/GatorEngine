@@ -16,8 +16,10 @@ def fatal(type: type[Exception], message: str):
         Singletons.editor.destroy()
     elif Singletons.app:
         Singletons.app.destroy()
+    input("Press any key to exit...")
     sys.exit(-1)
     
 def warning(type: type[Exception], message):
+    if Singletons.editor is None: return
     print(type.__name__+": "+message)
     
