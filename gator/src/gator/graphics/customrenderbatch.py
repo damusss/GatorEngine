@@ -1,14 +1,11 @@
 import glm
 import math
 
-from gator.common.singletons import Singletons
-import gator.common.events as events
-
 from gator.graphics.mesh import IndexedVertexMesh
 from gator.graphics.shader import Shader
 
-from gator.resources.texture import Texture
 from gator.core.camera import Camera
+from gator.common.singletons import Singletons
 from gator.components.shaderrenderer import ShaderRenderer
 
 class CustomRenderBatch:
@@ -16,12 +13,13 @@ class CustomRenderBatch:
     
     def __init__(self, maxShaderRenderers, meshConfig, shader):
         self.shader: Shader = shader
-        self.maxShaderRenderers = maxShaderRenderers
-        self.meshConfig = meshConfig
+        self.maxShaderRenderers: int = maxShaderRenderers
+        self.meshConfig: list[int, str, list[int], bool,
+                              list[float] | None, str, list[int]] = meshConfig
         self.camera: Camera = Singletons.app.scene.camera
         self.shaderRenderers: list[ShaderRenderer] = []
         self.vertices: list[float] = [
-            0 for i in range(self.maxShaderRenderers*4*self.VERTEX_SIZE)]
+            0 for _ in range(self.maxShaderRenderers*4*self.VERTEX_SIZE)]
         self.mesh: IndexedVertexMesh = IndexedVertexMesh(*self.meshConfig)
         self.rebufferData: bool = False
         

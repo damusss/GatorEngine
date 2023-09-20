@@ -1,11 +1,10 @@
-from gator.entity import Entity
 import glm
 
 from gator.components.component import Component
 import gator.components
 
 from gator.resources.assets import Assets
-from gator.resources.sprite import Sprite
+from gator.graphics.shader import Shader
 
 import gator.common.saving as saving
 import gator.common.gimgui as gimgui
@@ -15,18 +14,18 @@ class ShaderRenderer(Component):
     hideInProperties = ["col1", "col2", "col3", "col4", "active", "shader"]
     
     def __init__(self, shader=None, id: int = None, active: bool = True):
-        super().__init__()
+        super().__init__(id, active)
         
-        self.shader = Assets.getShader("exampleCustom") if not shader else shader
-        self.col1 = Colors.WHITE
-        self.col2 = Colors.WHITE
-        self.col3 = Colors.WHITE
-        self.col4 = Colors.WHITE
+        self.shader: Shader = Assets.getShader("exampleCustom") if not shader else shader
+        self.col1: glm.vec4 = Colors.WHITE
+        self.col2: glm.vec4 = Colors.WHITE
+        self.col3: glm.vec4 = Colors.WHITE
+        self.col4: glm.vec4 = Colors.WHITE
         
-        self._lastC1 = glm.vec4(self.col1)
-        self._lastC2 = glm.vec4(self.col2)
-        self._lastC3 = glm.vec4(self.col3)
-        self._lastC4 = glm.vec4(self.col4)
+        self._lastC1: glm.vec4 = glm.vec4(self.col1)
+        self._lastC2: glm.vec4 = glm.vec4(self.col2)
+        self._lastC3: glm.vec4 = glm.vec4(self.col3)
+        self._lastC4: glm.vec4 = glm.vec4(self.col4)
         
         self.icShaderName = self.shader.assetName
         
@@ -46,7 +45,7 @@ class ShaderRenderer(Component):
             self.shaderUpdated()
         self.endImgui()
         
-    def toFile(self):
+    def toFile(self) -> dict:
         base = super().toFile()
         base.update({
             "shader": saving.saveShader(self.shader),
@@ -58,7 +57,7 @@ class ShaderRenderer(Component):
         return base
         
     @classmethod
-    def fromFile(cls, cData: dict, entity: Entity):
+    def fromFile(cls, cData: dict, entity):
         renderer = ShaderRenderer(saving.loadShader(cData["shader"]), cData["id"], cData["active"])
         renderer.col1 = saving.loadVec4(cData["col1"])
         renderer.col2 = saving.loadVec4(cData["col2"])
@@ -67,8 +66,7 @@ class ShaderRenderer(Component):
         return renderer
         
     def update(self):
-        if not self.entity._renderbatch:
-            return
+        if not self.entity._renderbatch: return
         
         if self.col1 != self._lastC1 or self.col2 != self._lastC2 or self.col3 != self._lastC3 or self.col4 != self._lastC4:
             self.entity.dirty = True

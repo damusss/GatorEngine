@@ -12,15 +12,15 @@ class AppSettings:
         self.allCompsMod = allCompsMod
         self.customResMod = customResMod
         
-CONFIG_WINDOWS = False
+CONFIG_WINDOWS: bool = False
 WINDOW_FLAGS = imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_RESIZE if not CONFIG_WINDOWS else imgui.NONE
 
-COLUMN_DIVIDER = 4.7
-HEIGHT_DIVIDER = 3.5
+COLUMN_DIVIDER: float = 4.7
+HEIGHT_DIVIDER: float = 3.5
 
-EMPTY_PROJECT_MAIN_SCENE = '{"entities": [], "inactiveEntities": [], "camera": {"pos": [0.0, 0.0, 0.0], "zoom": 1}, "clearColor": [0.0, 0.0, 0.0, 1.0]}'
+EMPTY_PROJECT_MAIN_SCENE: str = '{"entities": [], "inactiveEntities": [], "camera": {"pos": [0.0, 0.0, 0.0], "zoom": 1}, "clearColor": [0.0, 0.0, 0.0, 1.0]}'
 
-EMPTY_PROJECT_COMPS_MODULE = """# Gator Engine Editor - Auto generated file - Modify with custom components
+EMPTY_PROJECT_COMPS_MODULE: str = """# Gator Engine Editor - Auto generated file - Modify with custom components
 
 from gator.components.all import defaultComponents
 # Import your custom components
@@ -34,7 +34,7 @@ allComponents = [
 ]
 """
 
-EMPTY_PROJECT_CUSTOM_RES = """# Gator Engine Editor - Auto generated file - Modify loading custom resources
+EMPTY_PROJECT_CUSTOM_RES: str = """# Gator Engine Editor - Auto generated file - Modify loading custom resources
 
 from gator.resources.texture import Texture
 from gator.graphics.shader import Shader
@@ -53,7 +53,7 @@ def loadResources():
     pass
 """
 
-EXPORT_TEMPLATE = """#########################################################################################################################################
+EXPORT_TEMPLATE: str = """#########################################################################################################################################
 
 # Gator Engine Editor - Auto generated file - Do not modify
 

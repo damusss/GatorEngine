@@ -12,6 +12,7 @@ from gator.common.colors import Colors
 
 from geditor.imguilayer import ImguiLayer
 from geditor.components.editorcamera import EditorCamera
+from geditor.components.gizmos import Gizmos
 
 from geditor.tabs.properties import PropertiesTab
 from geditor.tabs.scenesettings import SceneSettingsTab
@@ -47,6 +48,8 @@ class GatorEditor:
         
         self.imguiLayer: ImguiLayer = ImguiLayer(
             self.app.window.width, self.app.window.height, self.app.window.glfwWindow, self.app.window)
+        self.gizmos: Gizmos = Gizmos()
+        
         self.inProject: bool = not (
             appSettings.projectName == "none" and appSettings.sceneName == "idle")
         self._sceneNameBeforePlay = self.app.scene.name
@@ -158,15 +161,20 @@ class GatorEditor:
     def update(self, shader: Shader):
         self.framebuffer.bind()
         self.app.window.clear(self.app.scene.clearColor)
+        
         if self.playing:
             self.app.scene.update()
         else:
             self.app.scene.editorUpdate()
             self.editorCamera.update()
+            
+        self.gizmos.update()
+        self.propertiesTab.update()
+        
         self.app.scene.render(shader)
+        self.gizmos.render()
         self.framebuffer.unbind()
         
-        self.propertiesTab.update()
         self.imguiLayer.imgui(self.propertiesTab,
                               self.sceneSettingsTab,
                               self.menuBarTab,
@@ -279,7 +287,10 @@ class GatorEditor:
         self.destroy()
 
     def destroy(self):
+        try: self.gizmos.destroy()
+        except: pass
         try: self.imguiLayer.destroy()
         except: pass
         try: self.app.destroy()
         except: pass
+        

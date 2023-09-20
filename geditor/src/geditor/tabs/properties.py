@@ -34,17 +34,21 @@ class PropertiesTab:
         
     def setSelected(self, entity: Entity):
         self.selectedEntity = entity
+        Singletons.editor.gizmos.setMode(1)
         if Singletons.editor.playing:
             self._enityIDBeforePlay = self.selectedEntity.ID if self.selectedEntity else None
             
     def update(self):
         if not Singletons.editor.gameViewTab.hovered: return
+        if Singletons.editor.gizmos.hovering: return
         if Mouse.getButtonDown(Mouse.buttons.MOUSE_BUTTON_LEFT):
+            selAny = False
             projected = Singletons.editor.gameViewTab.viewportMouseWorldPos
-            for entity in sorted(Singletons.app.scene.entities, key=lambda e: -e.transform.position.z):
-                if abs(projected.x-entity.transform.position.x) <= entity.transform.scale.x/2 and abs(projected.y-entity.transform.position.y) <= entity.transform.scale.y/2:
-                    self.setSelected(entity)
-                    return
+            if e:= Singletons.app.scene.camera.rayCast(projected):
+                self.setSelected(e)
+                selAny = True
+            if not selAny:
+                self.setSelected(None)
         
     def imgui(self):
         imgui.set_next_window_position(0,Tracker.menuBarH)

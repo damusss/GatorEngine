@@ -1,6 +1,12 @@
 import glm
+import math
+import typing
+
 from gator.core.mouse import Mouse
 from gator.common.singletons import Singletons
+
+if typing.TYPE_CHECKING:
+    from gator.entity import Entity
 
 class Camera:
     def __init__(self):
@@ -15,13 +21,16 @@ class Camera:
         self.inverseView: glm.mat4x4 = glm.inverse(self.view)
         self.mousePosWorld: glm.vec3 = self.screenToWorld(
             glm.vec3(Mouse.mousePos.x, Mouse.mousePos.y, 0))
+        self.mouseRelWorld: glm.vec3 = glm.vec3()
 
     def update(self):
         self.view = glm.translate(glm.scale(glm.mat4(1.0), glm.vec3(
             self.zoom, self.zoom, 1)), -self.position)
         self.inverseView: glm.mat4x4 = glm.inverse(self.view)
-        self.mousePosWorld = self.screenToWorld(
+        mousePosWorld = self.screenToWorld(
             glm.vec3(Mouse.mousePos.x, Mouse.mousePos.y, 0))
+        self.mouseRelWorld = mousePosWorld-self.mousePosWorld
+        self.mousePosWorld = mousePosWorld
 
     def screenToWorld(self, position: glm.vec3) -> glm.vec3:
         vec = glm.vec4(
@@ -54,3 +63,35 @@ class Camera:
         pos = self.inverseProj*vec
         pos.z = 0
         return glm.vec3(pos.x, pos.y, pos.z)
+    
+    def rayCast(self, position: glm.vec3, layers: list[int]|None = None) -> "Entity":
+        if layers:
+            for layer in layers:
+                for entity in sorted(Singletons.app.scene._entityLayerCache[layer], key=lambda e: -e.transform.position.z):
+                    if abs(position.x-entity.transform.position.x) <= abs(entity.transform.rotatedScale.x)/2 and abs(position.y-entity.transform.position.y) <= abs(entity.transform.rotatedScale.y)/2:
+                        return entity
+            return None
+        for entity in sorted(Singletons.app.scene.entities, key=lambda e: -e.transform.position.z):
+            if abs(position.x-entity.transform.position.x) <= abs(entity.transform.rotatedScale.x)/2 and abs(position.y-entity.transform.position.y) <= abs(entity.transform.rotatedScale.y)/2:
+                return entity
+        return None
+    
+    def rayCastAll(self, position: glm.vec3, layers: list[int]|None = None) -> list["Entity"]:
+        entities = []
+        if layers:
+            for layer in layers:
+                for entity in sorted(Singletons.app.scene._entityLayerCache[layer], key=lambda e: -e.transform.position.z):
+                    if abs(position.x-entity.transform.position.x) <= abs(entity.transform.rotatedScale.x)/2 and abs(position.y-entity.transform.position.y) <= abs(entity.transform.rotatedScale.y)/2:
+                        entities.append(entity)
+            return entities
+        for entity in sorted(Singletons.app.scene.entities, key=lambda e: -e.transform.position.z):
+            if abs(position.x-entity.transform.position.x) <= abs(entity.transform.rotatedScale.x)/2 and abs(position.y-entity.transform.position.y) <= abs(entity.transform.rotatedScale.y)/2:
+                entities.append(entity)
+        return entities
+    
+    def singleRayCast(self, position: glm.vec3, entity: "Entity") -> bool:
+        return abs(position.x-entity.transform.position.x) <= abs(entity.transform.scale.x)/2 and abs(position.y-entity.transform.position.y) <= abs(entity.transform.scale.y)/2
+
+    def rawRayCast(self, rayPosition: glm.vec3, objPosition: glm.vec3, objScale: glm.vec2, objRotation: float) -> bool:
+        objScale = glm.rotate(objScale, math.radians(objRotation))
+        return abs(rayPosition.x-objPosition.x) <= abs(objScale.x)/2 and abs(rayPosition.y-objPosition.y) <= abs(objScale.y)/2

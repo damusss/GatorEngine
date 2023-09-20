@@ -1,16 +1,18 @@
 import glm
+import math
 
 from gator.components.component import Component
 import gator.common.saving as saving
 
 
 class Transform(Component):
-    hideInProperties: list[str] = ["active"]
+    hideInProperties: list[str] = ["active", "rotatedScale"]
     
     def __init__(self, id=None, active=True):
         super().__init__(id, active)
         self.position: glm.vec3 = glm.vec3(0,0,0)
         self.scale: glm.vec2 = glm.vec2(1,1)
+        self.rotatedScale: glm.vec2 = glm.vec2(self.scale)
         self.rotation: float = 0
 
         self._lastPos: glm.vec3 = glm.vec3(self.position)
@@ -35,8 +37,9 @@ class Transform(Component):
         return t
 
     def update(self):
-        if not self.entity._renderbatch: return
+        self.rotatedScale = glm.rotate(self.scale, math.radians(self.rotation))
         
+        if not self.entity._renderbatch: return
         if self._lastPos != self.position or self._lastScale != self.scale or self._lastRot != self.rotation:
             self.entity.dirty = True
 

@@ -14,14 +14,14 @@ class Sprite:
         self.texture: Texture = texture
         self.texCoords: glm.vec2 = texCoords
         
-    def calcGridSheetCords(self, w, h, i):
+    def calcGridSheetCords(self, w: int, h: int, i: int):
         if self.texture is None: return
         if w==0 or h==0: return
         if w >= self.texture.width or h >= self.texture.height: self.texCoords = self.DEFAULT_TEX_COORDS
         
         idx = 0
         cx = 0
-        cy = 0
+        cy = self.texture.height-h
         while idx < 10000:
             if idx == i:
                 l, t, r, b = cx/self.texture.width, cy/self.texture.height, (cx+w)/self.texture.width, (cy+h)/self.texture.height
@@ -35,17 +35,18 @@ class Sprite:
             cx += w
             if cx >= self.texture.width:
                 cx = 0
-                cy += h
-            if cy >= self.texture.height:
+                cy -= h
+            if cy <= 0:
                 self.texCoords = self.DEFAULT_TEX_COORDS
                 return
             idx += 1
             
-    def calcOffsetheetCords(self, w, h, ox, oy):
+    def calcOffsetSheetCords(self, w: int, h: int, ox: int, oy: int):
         if self.texture is None: return
         if w==0 or h==0: return
         
-        l, t, r, b = ox/self.texture.width, oy/self.texture.height, (ox+w)/self.texture.width, (oy+h)/self.texture.height
+        oy = self.texture.height-oy
+        l, t, r, b = ox/self.texture.width, oy/self.texture.height, (ox+w)/self.texture.width, (oy-h)/self.texture.height
         self.texCoords = [
                 glm.vec2(r, t),
                 glm.vec2(r, b),

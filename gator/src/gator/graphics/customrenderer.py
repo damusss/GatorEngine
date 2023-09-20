@@ -16,7 +16,7 @@ class CustomRenderer:
     MESH_CONFIG: list[int, str, list[int], bool,
                       list[float] | None, str, list[int]] = []
     
-    UNIFORM_LOADERS = {}
+    UNIFORM_LOADERS: dict[str,object] = {}
     
     def __init__(self):
         events.register(events.COMP_ADDED, self.whenCompAdded)
@@ -39,7 +39,7 @@ class CustomRenderer:
         shader.uniform1F("uTime", Time.getTime())
     
     @classmethod
-    def registerUniformLoader(cls, shaderName, uniformLoaderFunc):
+    def registerUniformLoader(cls, shaderName: str, uniformLoaderFunc):
         cls.UNIFORM_LOADERS[shaderName] = uniformLoaderFunc
         
     def render(self):

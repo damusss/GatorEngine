@@ -1,16 +1,16 @@
 import imgui
 import glm
 
-LEFT_COL_W = 150
-INT_SPEED = 1
-FLOAT_SPEED = 0.05
-MIN_VALUE = 0
-MAX_VALUE = 100
+LEFT_COL_W: int = 150
+INT_SPEED: int = 1
+FLOAT_SPEED: float = 0.05
+MIN_VALUE: float = 0
+MAX_VALUE: float = 100
 
 
 class Tracker:
-    stolenPopup = False
-    menuBarH = 0
+    stolenPopup: bool = False
+    menuBarH: int = 0
 
 
 def leftCol(label: str):

@@ -2,7 +2,6 @@ import glm
 import math
 
 from gator.common.singletons import Singletons
-import gator.common.events as events
 
 from gator.graphics.mesh import IndexedVertexMesh
 from gator.graphics.shader import Shader

@@ -9,6 +9,7 @@ import gator.common.gimgui as gimgui
 import gator.common.error as error
 
 from gator.graphics.renderbatch import RenderBatch
+from gator.graphics.customrenderbatch import CustomRenderBatch
 
 
 class Entity:
@@ -25,7 +26,7 @@ class Entity:
         self.dirty: bool = True
         self.components: dict[type[Component], Component] = {}
         self.transform: Transform = None
-        self._renderbatch: RenderBatch = None
+        self._renderbatch: RenderBatch|CustomRenderBatch = None
         self._batchindex: int = -1
         self._lastLayer = self.layer
         Singletons.app.scene._entityUIDCache[self.ID] = self
@@ -75,6 +76,10 @@ class Entity:
         return type in self.components
 
     def update(self):
+        if self._lastLayer != self.layer:
+            self._lastLayer = self.layer
+            self.scene._refreshLayerCache()
+            
         compsToRemove: list[list[type[Component], Component]] = []
         for name, comp in self.components.items():
             if comp.dead:

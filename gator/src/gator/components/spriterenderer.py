@@ -125,7 +125,7 @@ class SpriteRenderer(Component):
             if self.geIsGrid:
                 self.sprite.calcGridSheetCords(self.geSpriteWidth, self.geSpriteHeight, self.geSpriteIndex)
             else:
-                self.sprite.calcOffsetheetCords(self.geSpriteWidth, self.geSpriteHeight, self.geSpriteOffsetX, self.geSpriteOffsetY)
+                self.sprite.calcOffsetSheetCords(self.geSpriteWidth, self.geSpriteHeight, self.geSpriteOffsetX, self.geSpriteOffsetY)
         else:
             self.sprite.texCoords = self.sprite.DEFAULT_TEX_COORDS
         if not self.entity._renderbatch:
