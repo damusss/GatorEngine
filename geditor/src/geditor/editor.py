@@ -9,6 +9,7 @@ from gator.common.settings import AppSettings, EMPTY_PROJECT_MAIN_SCENE, EMPTY_P
 from gator.common.singletons import Singletons
 import gator.common.events as events
 from gator.common.colors import Colors
+import gator.common.error as error
 
 from geditor.imguilayer import ImguiLayer
 from geditor.components.editorcamera import EditorCamera
@@ -34,6 +35,9 @@ from gator.application import Application
 class GatorEditor:
 
     def __init__(self, appSettings: AppSettings):
+        if Singletons.editor is not None:
+            error.fatal(error.GatorError, "Only one instance of the geditor.GatorEditor class can be crated")
+            
         Singletons.editor = self
         events.register(events.SCENE_SAVED, self.whenSceneSave)
         events.register(events.SCENE_LOADED, self.whenSceneLoad)

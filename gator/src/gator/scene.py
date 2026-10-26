@@ -34,6 +34,7 @@ class Scene:
         self._entityLayerCache: dict[int, list[Entity]] = {}
 
     def load(self):
+        self.started = False
         self.entities = []
         self.inactiveEntities = []
         self._entityNameCache = {}

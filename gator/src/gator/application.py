@@ -2,6 +2,7 @@ from OpenGL.GL import *
 
 from gator.common.singletons import Singletons
 from gator.common.settings import AppSettings
+import gator.common.error as error
 
 from gator.core.window import Window
 from gator.core.time import Time
@@ -15,6 +16,9 @@ from gator.scene import Scene
 class Application:
 
     def init(self, appSettings: AppSettings):
+        if Singletons.app is not None:
+            error.fatal(error.GatorError, "Only one instance of the gator.Application class can be crated")
+        
         Singletons.app = self
         self.projectName = "GatorEngine_" + appSettings.projectName
         self.searchPath = appSettings.searchPath

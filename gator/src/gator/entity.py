@@ -24,7 +24,7 @@ class Entity:
         self.dead: bool = False
         self.scene = Singletons.app.scene
         self.dirty: bool = True
-        self.components: dict[type[Component], Component] = {}
+        self.components: dict[str, Component] = {}
         self.transform: Transform = None
         self._renderbatch: RenderBatch|CustomRenderBatch = None
         self._batchindex: int = -1
@@ -60,7 +60,7 @@ class Entity:
         return entity
 
     def addComponent(self, component: Component) -> Component:
-        self.components[component.__class__] = component
+        self.components[component.__class__.__name__] = component
         component.entity = self
         component.init()
         if Singletons.app.scene.started:
@@ -70,9 +70,11 @@ class Entity:
         return component
 
     def getComponent(self, type: type[Component], default=None) -> Component:
+        if not isinstance(type, str): type = type.__name__
         return self.components.get(type, default)
 
     def hasComponent(self, type: type[Component]) -> bool:
+        if not isinstance(type, str): type = type.__name__
         return type in self.components
 
     def update(self):
@@ -85,7 +87,10 @@ class Entity:
             if comp.dead:
                 compsToRemove.append([name, comp])
             if comp.active:
-                comp.update()
+                try:
+                    comp.update()
+                except Exception as e:
+                    error.warning(error.GatorError, f"{comp.__class__.__name__}.update(): {e}")
         for name, comp in compsToRemove:
             if (name is Transform):
                 continue

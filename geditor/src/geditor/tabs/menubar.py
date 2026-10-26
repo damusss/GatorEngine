@@ -1,6 +1,7 @@
 import imgui
 from gator.common.singletons import Singletons
 from gator.common.gimgui import Tracker
+from gator.core.keys import Keyboard
 
 class MenuBarTab:
     def __init__(self, saveFunc, openFunc, exportFunc, quitFunc, createSceneFunc, loadSceneFunc):

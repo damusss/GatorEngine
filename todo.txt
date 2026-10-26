@@ -1,8 +1,15 @@
 TODO:
-- gizmos
-- debug draw
+- fix keyboard "lag"
+- shape renderer
 - texture to sprite drag drop editor
 - transform parenting
+
+- import texture in editor
+- create component in editor
+- refresh
+- console
+- transform property in component
+- replace glfw with pygame???
 
 WAITING:
 - make docking work
@@ -12,3 +19,4 @@ WAITING:
 DONE:
 - temp: fix window position
 - shader renderer
+- gizmos

@@ -4,7 +4,7 @@ from gator.common.settings import AppSettings
 from geditor.editor import GatorEditor
 
 def main():
-    settings = AppSettings("auto", "auto", True, "Gator Engine Editor [Test]", "main", "test", "projects.", None, None)
+    settings = AppSettings("auto", "auto", True, "Gator Engine Editor [Test]", "main", "pong", "projects.", None, None)
     editor = GatorEditor(settings)
     editor.run()
 
